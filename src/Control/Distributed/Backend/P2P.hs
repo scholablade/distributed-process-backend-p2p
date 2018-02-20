@@ -63,16 +63,30 @@ makeNodeId :: String -> NodeId
 makeNodeId addr = NodeId . EndPointAddress . BS.concat $ [BS.pack addr, ":0"]
 
 -- | Start a controller service process and aquire connections to a swarm.
-bootstrap :: HostName -> ServiceName -> [NodeId] -> RemoteTable -> Process () -> IO ()
-bootstrap host port seeds rTable prc = do
-    node <- createLocalNode host port rTable
+bootstrap
+  :: HostName
+  -> ServiceName
+  -> (ServiceName -> (HostName, ServiceName))
+  -> RemoteTable
+  -> [NodeId]
+  -> Process ()
+  -> IO ()
+bootstrap host port ext rTable seeds prc = do
+    node <- createLocalNode host port ext rTable
     _ <- forkProcess node $ peerController seeds
     runProcess node $ waitController prc
 
 -- | Like 'bootstrap' but use 'forkProcess' instead of 'runProcess'. Returns local node and pid of given process
-bootstrapNonBlocking :: HostName -> ServiceName -> [NodeId] -> RemoteTable -> Process () -> IO (LocalNode, ProcessId)
-bootstrapNonBlocking host port seeds rTable prc = do
-    node <- createLocalNode host port rTable
+bootstrapNonBlocking
+  :: HostName
+  -> ServiceName
+  -> (ServiceName -> (HostName, ServiceName))
+  -> RemoteTable
+  -> [NodeId]
+  -> Process ()
+  -> IO (LocalNode, ProcessId)
+bootstrapNonBlocking host port ext rTable seeds prc = do
+    node <- createLocalNode host port ext rTable
     _ <- forkProcess node $ peerController seeds
     pid <- forkProcess node $ waitController prc
     return (node, pid)
@@ -86,12 +100,16 @@ waitController prc = do
         Just _ -> say "Bootstrap complete." >> prc
 
 -- | Creates tcp local node which used by 'bootstrap'
-createLocalNode :: HostName -> ServiceName -> RemoteTable -> IO LocalNode
-createLocalNode host port rTable = do
+createLocalNode
+  :: HostName
+  -> ServiceName
+  -> (ServiceName -> (HostName, ServiceName))
+  -> RemoteTable
+  -> IO LocalNode
+createLocalNode host port mkExternal rTable = do
     transport <- either (error . show) id
-                 <$> createTransport host port defaultTCPParameters
+                 <$> createTransport host port mkExternal defaultTCPParameters
     newLocalNode transport rTable
-
 
 peerControllerService :: String
 peerControllerService = "P2P:Controller"

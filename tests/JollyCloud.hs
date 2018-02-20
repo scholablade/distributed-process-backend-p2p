@@ -15,7 +15,9 @@ main = do
   args <- getArgs
 
   case args of
-    host:port:seeds -> P2P.bootstrap host port (map P2P.makeNodeId seeds) initRemoteTable mainProcess
+    host:port:seeds -> do
+      let ext = const (host, port)
+      P2P.bootstrap host port ext initRemoteTable (map P2P.makeNodeId seeds) mainProcess
     _ -> putStrLn "Usage: jollycloud addr port [<seed>..]"
 
 mainProcess :: Process ()
