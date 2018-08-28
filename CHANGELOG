@@ -1,3 +1,8 @@
+0.1.5.0:
+
+    * Use async messages instead of channels for discovery.
+      Should prevent deadlocks in peer exchange.
+
 0.1.4.0:
 
     * Limit network-transport-tcp to >=0.6

@@ -1,11 +1,11 @@
--- This file has been generated from package.yaml by hpack version 0.20.0.
+-- This file has been generated from package.yaml by hpack version 0.28.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a01a000a7a5b07e8ffbf1a52a25f9e247795e9751b5c8894682ed84f6eccd127
+-- hash: a8fa97b703de94703e2085a4835441a1b3f28ab0a9b2bf8caeb881d7ad0c77a5
 
 name:                distributed-process-p2p
-version:             0.1.4.0
+version:             0.1.5.0
 synopsis:            Peer-to-peer node discovery for Cloud Haskell
 description:         Bootstraps a peer-to-peer connection network from a set of known hosts.
 homepage:            https://bitbucket.org/dpwiz/distributed-process-p2p/
@@ -17,7 +17,6 @@ copyright:           Alexander Bondarenko
 category:            Network
 build-type:          Simple
 cabal-version:       >= 1.10
-
 extra-source-files:
   CHANGELOG
 
