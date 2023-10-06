@@ -39,15 +39,15 @@ library
     src
   ghc-options: -Wall
   build-depends:
-    base ==4.*,
-    binary >=0.5,
-    bytestring >=0.9,
-    containers >=0.4,
-    distributed-process >=0.5,
-    mtl >=2.1,
-    network >=2.3,
-    network-transport >=0.4,
-    network-transport-tcp >=0.6
+    base,
+    binary,
+    bytestring,
+    containers,
+    distributed-process,
+    mtl,
+    network,
+    network-transport,
+    network-transport-tcp
 
 executable jollycloud
   hs-source-dirs:
@@ -55,10 +55,10 @@ executable jollycloud
   main-is: JollyCloud.hs
   ghc-options: -threaded
   build-depends:
-    base ==4.*,
+    base,
     distributed-process >=0.5,
     distributed-process-p2p,
-    mtl >=2.1
+    mtl
   if flag(build-example)
     buildable: True
   other-modules:

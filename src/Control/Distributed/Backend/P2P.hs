@@ -1,4 +1,5 @@
-{-# LANGUAGE OverloadedStrings, RecordWildCards #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards   #-}
 
 -- | Peer-to-peer node discovery backend for Cloud Haskell based on the TCP
 -- transport. Provided with a known node address it discovers and maintains
@@ -28,23 +29,26 @@ module Control.Distributed.Backend.P2P (
     waitController
 ) where
 
-import Control.Distributed.Process                as DP
-import Control.Distributed.Process.Node           as DPN
-import Control.Distributed.Process.Serializable (Serializable)
-import Network.Transport (EndPointAddress(..))
-import Network.Socket (HostName, ServiceName)
-import Network.Transport.TCP (createTransport, defaultTCPParameters)
+import           Control.Distributed.Process              as DP
+import           Control.Distributed.Process.Node         as DPN
+import           Control.Distributed.Process.Serializable (Serializable)
+import           Network.Socket                           (HostName,
+                                                           ServiceName)
+import           Network.Transport                        (EndPointAddress (..))
+import           Network.Transport.TCP                    (createTransport,
+                                                           defaultTCPAddr,
+                                                           defaultTCPParameters)
 
-import Control.Applicative
-import Control.Concurrent (threadDelay)
-import Control.Concurrent.MVar
-import Control.Monad
+import           Control.Applicative
+import           Control.Concurrent                       (threadDelay)
+import           Control.Concurrent.MVar
+import           Control.Monad
 
-import qualified Data.ByteString.Char8 as BS
-import qualified Data.Set as S
-import Data.Binary (Binary(..))
-import Data.Maybe (isJust)
-import Data.Typeable (Typeable)
+import           Data.Binary                              (Binary (..))
+import qualified Data.ByteString.Char8                    as BS
+import           Data.Maybe                               (isJust)
+import qualified Data.Set                                 as S
+import           Data.Typeable                            (Typeable)
 
 
 -- * Peer-to-peer API
@@ -100,7 +104,7 @@ waitController prc = do
     res <- whereis peerControllerService
     case res of
         Nothing -> (liftIO $ threadDelay 100000) >> waitController prc
-        Just _ -> say "Bootstrap complete." >> prc
+        Just _  -> say "Bootstrap complete." >> prc
 
 -- | Creates tcp local node which used by 'bootstrap'
 createLocalNode
@@ -111,7 +115,7 @@ createLocalNode
   -> IO LocalNode
 createLocalNode host port mkExternal rTable = do
     transport <- either (error . show) id
-                 <$> createTransport host port mkExternal defaultTCPParameters
+                 <$> createTransport (defaultTCPAddr host port) defaultTCPParameters
     newLocalNode transport rTable
 
 peerControllerService :: String
@@ -208,7 +212,7 @@ onPeerCapable (service, replyTo) = do
     say $ "Capability request: " ++ service
     res <- whereis service
     case res of
-        Nothing -> say "I can't."
+        Nothing  -> say "I can't."
         Just pid -> say "I can!" >> sendChan replyTo pid
 
 onMonitor :: PeerState -> ProcessMonitorNotification -> Process ()
