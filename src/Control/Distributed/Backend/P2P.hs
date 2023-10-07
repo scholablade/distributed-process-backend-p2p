@@ -73,13 +73,12 @@ makeNodeId addr = NodeId . EndPointAddress . BS.concat $ [BS.pack addr, ":0"]
 bootstrap
   :: HostName
   -> ServiceName
-  -> (ServiceName -> (HostName, ServiceName))
   -> RemoteTable
   -> [NodeId]
   -> Process ()
   -> IO ()
-bootstrap host port ext rTable seeds prc = do
-    node <- createLocalNode host port ext rTable
+bootstrap host port rTable seeds prc = do
+    node <- createLocalNode host port rTable
     _ <- forkProcess node $ peerController seeds
     runProcess node $ waitController prc
 
@@ -87,13 +86,12 @@ bootstrap host port ext rTable seeds prc = do
 bootstrapNonBlocking
   :: HostName
   -> ServiceName
-  -> (ServiceName -> (HostName, ServiceName))
   -> RemoteTable
   -> [NodeId]
   -> Process ()
   -> IO (LocalNode, ProcessId)
-bootstrapNonBlocking host port ext rTable seeds prc = do
-    node <- createLocalNode host port ext rTable
+bootstrapNonBlocking host port  rTable seeds prc = do
+    node <- createLocalNode host port rTable
     _ <- forkProcess node $ peerController seeds
     pid <- forkProcess node $ waitController prc
     return (node, pid)
@@ -110,10 +108,9 @@ waitController prc = do
 createLocalNode
   :: HostName
   -> ServiceName
-  -> (ServiceName -> (HostName, ServiceName))
   -> RemoteTable
   -> IO LocalNode
-createLocalNode host port mkExternal rTable = do
+createLocalNode host port rTable = do
     transport <- either (error . show) id
                  <$> createTransport (defaultTCPAddr host port) defaultTCPParameters
     newLocalNode transport rTable
